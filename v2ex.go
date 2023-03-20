@@ -70,6 +70,16 @@ type V2exReply struct {
 	Member          V2exMember `json:"member"`
 }
 
+type V2exToken struct {
+	Created     int    `json:"created"`
+	Expiration  int    `json:"expiration"`
+	GoodForDays int    `json:"good_for_days"`
+	LastUsed    int    `json:"last_used"`
+	Scope       string `json:"scope"`
+	Token       string `json:"token"`
+	TotalUsed   int    `json:"total_used"`
+}
+
 type GetNodeResponse struct {
 	Message string   `json:"message"`
 	Result  V2exNode `json:"result"`
@@ -99,6 +109,12 @@ type GetTopicRepliesResponse struct {
 	Message string      `json:"message"`
 	Result  []V2exReply `json:"result"`
 	Success bool        `json:"success"`
+}
+
+type GetTokenResponse struct {
+	Message string    `json:"message"`
+	Result  V2exToken `json:"result"`
+	Success bool      `json:"success"`
 }
 
 func (c Client) request(method string, path string, params map[string]string, data map[string]any) (*[]byte, error) {
@@ -192,4 +208,18 @@ func (c Client) GetTopicReplies(topicID int, page int) (GetTopicRepliesResponse,
 		return resp, err
 	}
 	return resp, nil
+}
+
+// 查看当前使用的令牌
+func (c Client) GetToken() (GetTokenResponse, error) {
+	var resp GetTokenResponse
+	resp_body, err := c.request("GET", "/token", nil, nil)
+	if err != nil {
+		return resp, err
+	}
+	if err := json.Unmarshal(*resp_body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+
 }
