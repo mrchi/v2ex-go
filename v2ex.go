@@ -16,7 +16,7 @@ type Client struct {
 	token string
 }
 
-type GetNodeResult struct {
+type V2exNode struct {
 	Avatar       string `json:"avatar"`
 	Created      int    `json:"created"`
 	Footer       string `json:"footer"`
@@ -29,13 +29,7 @@ type GetNodeResult struct {
 	Url          string `json:"url"`
 }
 
-type GetNodeResponse struct {
-	Message string        `json:"message"`
-	Result  GetNodeResult `json:"result"`
-	Success bool          `json:"success"`
-}
-
-type GetNodeTopicsResult struct {
+type V2exTopic struct {
 	Content         string `json:"content"`
 	ContentRendered string `json:"content_rendered"`
 	Created         int    `json:"created"`
@@ -49,10 +43,62 @@ type GetNodeTopicsResult struct {
 	Url             string `json:"url"`
 }
 
+type V2exMember struct {
+	Avatar   string `json:"avatar"`
+	Bio      string `json:"bio"`
+	Created  int    `json:"created"`
+	Github   string `json:"github"`
+	Id       int    `json:"id"`
+	Url      string `json:"url"`
+	Username string `json:"username"`
+	Website  string `json:"website"`
+}
+
+type V2exSupplement struct {
+	Content          string `json:"content"`
+	Content_Rendered string `json:"content_rendered"`
+	Created          int    `json:"created"`
+	Id               int    `json:"id"`
+	Syntax           int    `json:"syntax"`
+}
+
+type V2exReply struct {
+	Content         string     `json:"content"`
+	ContentRendered string     `json:"content_rendered"`
+	Created         int        `json:"created"`
+	Id              int        `json:"id"`
+	Member          V2exMember `json:"member"`
+}
+
+type GetNodeResponse struct {
+	Message string   `json:"message"`
+	Result  V2exNode `json:"result"`
+	Success bool     `json:"success"`
+}
+
 type GetNodeTopicsResponse struct {
-	Message string                `json:"message"`
-	Result  []GetNodeTopicsResult `json:"result"`
-	Success bool                  `json:"success"`
+	Message string      `json:"message"`
+	Result  []V2exTopic `json:"result"`
+	Success bool        `json:"success"`
+}
+
+type GetTopicResult struct {
+	V2exTopic
+	Member      V2exMember       `json:"member"`
+	Node        V2exNode         `json:"node"`
+	Supplements []V2exSupplement `json:"supplements"`
+}
+
+type GetTopicResponse struct {
+	Message string         `json:"message"`
+	Result  GetTopicResult `json:"result"`
+	Success bool           `json:"success"`
+}
+
+type GetTopicRepliesResponse struct {
+	Message string      `json:"message"`
+	Result  []V2exReply `json:"result"`
+	Success bool        `json:"success"`
 }
 
 func (c Client) request(method string, path string, params map[string]string, data map[string]any) (*[]byte, error) {
@@ -121,5 +167,29 @@ func (c Client) GetNodeTopics(nodeName string, page int) (GetNodeTopicsResponse,
 	return resp, nil
 }
 
-func (c Client) GetTopic(topicID int)                  {}
-func (c Client) GetTopicReplies(topicID int, page int) {}
+// 获取指定主题
+func (c Client) GetTopic(topicID int) (GetTopicResponse, error) {
+	var resp GetTopicResponse
+	resp_body, err := c.request("GET", fmt.Sprintf("/topics/%d", topicID), nil, nil)
+	if err != nil {
+		return resp, err
+	}
+	if err := json.Unmarshal(*resp_body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+
+}
+
+// 获取指定主题下的回复
+func (c Client) GetTopicReplies(topicID int, page int) (GetTopicRepliesResponse, error) {
+	var resp GetTopicRepliesResponse
+	resp_body, err := c.request("GET", fmt.Sprintf("/topics/%d/replies", topicID), map[string]string{"p": strconv.Itoa(page)}, nil)
+	if err != nil {
+		return resp, err
+	}
+	if err := json.Unmarshal(*resp_body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
