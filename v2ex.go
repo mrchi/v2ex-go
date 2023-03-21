@@ -99,6 +99,19 @@ type V2exSelfProfile struct {
 	Website      string `json:"website"`
 }
 
+type V2exNotification struct {
+	Created     int `json:"created"`
+	ForMemberId int `json:"for_member_id"`
+	Id          int `json:"id"`
+	Member      struct {
+		Username string `json:"username"`
+	} `json:"member"`
+	MemberId        int    `json:"member_id"`
+	Payload         string `json:"payload"`
+	PayloadRendered string `json:"payload_rendered"`
+	Text            string `json:"text"`
+}
+
 type GetNodeResponse struct {
 	Message string   `json:"message"`
 	Result  V2exNode `json:"result"`
@@ -139,6 +152,12 @@ type GetTokenResponse struct {
 type GetSelfProfileResponse struct {
 	Success bool            `json:"success"`
 	Result  V2exSelfProfile `json:"result"`
+}
+
+type GetNotificationsResponse struct {
+	Message string             `json:"message"`
+	Result  []V2exNotification `json:"result"`
+	Success bool               `json:"success"`
 }
 
 func (c Client) request(method string, path string, params map[string]string, data map[string]any) (*[]byte, error) {
@@ -251,6 +270,19 @@ func (c Client) GetToken() (GetTokenResponse, error) {
 func (c Client) GetSelfProfile() (GetSelfProfileResponse, error) {
 	var resp GetSelfProfileResponse
 	resp_body, err := c.request("GET", "/member", nil, nil)
+	if err != nil {
+		return resp, err
+	}
+	if err := json.Unmarshal(*resp_body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
+
+// 获取最新的提醒
+func (c Client) GetNotifications(page int) (GetNotificationsResponse, error) {
+	var resp GetNotificationsResponse
+	resp_body, err := c.request("GET", "/notifications", map[string]string{"p": strconv.Itoa(page)}, nil)
 	if err != nil {
 		return resp, err
 	}
