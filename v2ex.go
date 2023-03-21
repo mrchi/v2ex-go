@@ -16,7 +16,7 @@ type Client struct {
 	token string
 }
 
-type V2exNode struct {
+type v2exNode struct {
 	Avatar       string `json:"avatar"`
 	Created      int    `json:"created"`
 	Footer       string `json:"footer"`
@@ -29,7 +29,7 @@ type V2exNode struct {
 	Url          string `json:"url"`
 }
 
-type V2exTopic struct {
+type v2exTopic struct {
 	Content         string `json:"content"`
 	ContentRendered string `json:"content_rendered"`
 	Created         int    `json:"created"`
@@ -43,7 +43,7 @@ type V2exTopic struct {
 	Url             string `json:"url"`
 }
 
-type V2exMember struct {
+type v2exMember struct {
 	Avatar   string `json:"avatar"`
 	Bio      string `json:"bio"`
 	Created  int    `json:"created"`
@@ -54,7 +54,7 @@ type V2exMember struct {
 	Website  string `json:"website"`
 }
 
-type V2exSupplement struct {
+type v2exSupplement struct {
 	Content          string `json:"content"`
 	Content_Rendered string `json:"content_rendered"`
 	Created          int    `json:"created"`
@@ -62,15 +62,15 @@ type V2exSupplement struct {
 	Syntax           int    `json:"syntax"`
 }
 
-type V2exReply struct {
+type v2exReply struct {
 	Content         string     `json:"content"`
 	ContentRendered string     `json:"content_rendered"`
 	Created         int        `json:"created"`
 	Id              int        `json:"id"`
-	Member          V2exMember `json:"member"`
+	Member          v2exMember `json:"member"`
 }
 
-type V2exToken struct {
+type v2exToken struct {
 	Created     int    `json:"created"`
 	Expiration  int    `json:"expiration"`
 	GoodForDays int    `json:"good_for_days"`
@@ -80,7 +80,7 @@ type V2exToken struct {
 	TotalUsed   int    `json:"total_used"`
 }
 
-type V2exSelfProfile struct {
+type v2exSelfProfile struct {
 	AvatarLarge  string `json:"avatar_large"`
 	AvatarMini   string `json:"avatar_mini"`
 	AvatarNormal string `json:"avatar_normal"`
@@ -99,7 +99,7 @@ type V2exSelfProfile struct {
 	Website      string `json:"website"`
 }
 
-type V2exNotification struct {
+type v2exNotification struct {
 	Created     int `json:"created"`
 	ForMemberId int `json:"for_member_id"`
 	Id          int `json:"id"`
@@ -114,49 +114,49 @@ type V2exNotification struct {
 
 type GetNodeResponse struct {
 	Message string   `json:"message"`
-	Result  V2exNode `json:"result"`
+	Result  v2exNode `json:"result"`
 	Success bool     `json:"success"`
 }
 
 type GetNodeTopicsResponse struct {
 	Message string      `json:"message"`
-	Result  []V2exTopic `json:"result"`
+	Result  []v2exTopic `json:"result"`
 	Success bool        `json:"success"`
 }
 
-type GetTopicResult struct {
-	V2exTopic
-	Member      V2exMember       `json:"member"`
-	Node        V2exNode         `json:"node"`
-	Supplements []V2exSupplement `json:"supplements"`
+type getTopicResult struct {
+	v2exTopic
+	Member      v2exMember       `json:"member"`
+	Node        v2exNode         `json:"node"`
+	Supplements []v2exSupplement `json:"supplements"`
 }
 
 type GetTopicResponse struct {
 	Message string         `json:"message"`
-	Result  GetTopicResult `json:"result"`
+	Result  getTopicResult `json:"result"`
 	Success bool           `json:"success"`
 }
 
 type GetTopicRepliesResponse struct {
 	Message string      `json:"message"`
-	Result  []V2exReply `json:"result"`
+	Result  []v2exReply `json:"result"`
 	Success bool        `json:"success"`
 }
 
 type GetTokenResponse struct {
 	Message string    `json:"message"`
-	Result  V2exToken `json:"result"`
+	Result  v2exToken `json:"result"`
 	Success bool      `json:"success"`
 }
 
 type GetSelfProfileResponse struct {
 	Success bool            `json:"success"`
-	Result  V2exSelfProfile `json:"result"`
+	Result  v2exSelfProfile `json:"result"`
 }
 
 type GetNotificationsResponse struct {
 	Message string             `json:"message"`
-	Result  []V2exNotification `json:"result"`
+	Result  []v2exNotification `json:"result"`
 	Success bool               `json:"success"`
 }
 
