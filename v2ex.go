@@ -80,6 +80,25 @@ type V2exToken struct {
 	TotalUsed   int    `json:"total_used"`
 }
 
+type V2exSelfProfile struct {
+	AvatarLarge  string `json:"avatar_large"`
+	AvatarMini   string `json:"avatar_mini"`
+	AvatarNormal string `json:"avatar_normal"`
+	Bio          string `json:"bio"`
+	Btc          string `json:"btc"`
+	Created      int    `json:"created"`
+	Github       string `json:"github"`
+	Id           int    `json:"id"`
+	LastModified int    `json:"last_modified"`
+	Location     string `json:"location"`
+	Psn          string `json:"psn"`
+	Tagline      string `json:"tagline"`
+	Twitter      string `json:"twitter"`
+	Url          string `json:"url"`
+	Username     string `json:"username"`
+	Website      string `json:"website"`
+}
+
 type GetNodeResponse struct {
 	Message string   `json:"message"`
 	Result  V2exNode `json:"result"`
@@ -115,6 +134,11 @@ type GetTokenResponse struct {
 	Message string    `json:"message"`
 	Result  V2exToken `json:"result"`
 	Success bool      `json:"success"`
+}
+
+type GetSelfProfileResponse struct {
+	Success bool            `json:"success"`
+	Result  V2exSelfProfile `json:"result"`
 }
 
 func (c Client) request(method string, path string, params map[string]string, data map[string]any) (*[]byte, error) {
@@ -221,5 +245,17 @@ func (c Client) GetToken() (GetTokenResponse, error) {
 		return resp, err
 	}
 	return resp, nil
+}
 
+// 获取自己的 Profile
+func (c Client) GetSelfProfile() (GetSelfProfileResponse, error) {
+	var resp GetSelfProfileResponse
+	resp_body, err := c.request("GET", "/member", nil, nil)
+	if err != nil {
+		return resp, err
+	}
+	if err := json.Unmarshal(*resp_body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
 }
