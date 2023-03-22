@@ -10,7 +10,8 @@ import (
 	"strconv"
 )
 
-const APIBaseURL string = "https://www.v2ex.com/api/v2/"
+type TokenScope string
+type TokenExpiration int
 
 type Client struct {
 	token string
@@ -160,7 +161,15 @@ type GetNotificationsResponse struct {
 	Success bool               `json:"success"`
 }
 
-func (c Client) request(method string, path string, params map[string]string, data map[string]any) (*[]byte, error) {
+type CreateTokenResponse struct {
+	Message string `json:"message"`
+	Result  struct {
+		Token string `json:"token"`
+	} `json:"result"`
+	Success bool `json:"success"`
+}
+
+func (c Client) request(method string, path string, params map[string]string, data map[string]string) (*[]byte, error) {
 	jsonBody, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -283,6 +292,19 @@ func (c Client) GetSelfProfile() (GetSelfProfileResponse, error) {
 func (c Client) GetNotifications(page int) (GetNotificationsResponse, error) {
 	var resp GetNotificationsResponse
 	resp_body, err := c.request("GET", "/notifications", map[string]string{"p": strconv.Itoa(page)}, nil)
+	if err != nil {
+		return resp, err
+	}
+	if err := json.Unmarshal(*resp_body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
+
+// 创建新的令牌
+func (c Client) CreateToken(scope TokenScope, expiration TokenExpiration) (CreateTokenResponse, error) {
+	var resp CreateTokenResponse
+	resp_body, err := c.request("POST", "/tokens", nil, map[string]string{"scope": string(scope), "expiration": strconv.Itoa(int(expiration))})
 	if err != nil {
 		return resp, err
 	}
