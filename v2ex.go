@@ -331,3 +331,8 @@ func (c Client) DeleteNotification(notificationId int) (DeleteNotificationRespon
 	}
 	return resp, nil
 }
+
+// Create V2EX API Client
+func NewClient(token string) Client {
+	return Client{token}
+}
