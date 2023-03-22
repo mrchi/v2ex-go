@@ -169,6 +169,11 @@ type CreateTokenResponse struct {
 	Success bool `json:"success"`
 }
 
+type DeleteNotificationResponse struct {
+	Message string `json:"message"`
+	Success bool   `json:"success"`
+}
+
 func (c Client) request(method string, path string, params map[string]string, data map[string]string) (*[]byte, error) {
 	jsonBody, err := json.Marshal(data)
 	if err != nil {
@@ -305,6 +310,19 @@ func (c Client) GetNotifications(page int) (GetNotificationsResponse, error) {
 func (c Client) CreateToken(scope TokenScope, expiration TokenExpiration) (CreateTokenResponse, error) {
 	var resp CreateTokenResponse
 	resp_body, err := c.request("POST", "/tokens", nil, map[string]string{"scope": string(scope), "expiration": strconv.Itoa(int(expiration))})
+	if err != nil {
+		return resp, err
+	}
+	if err := json.Unmarshal(*resp_body, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
+
+// 删除指定的提醒
+func (c Client) DeleteNotification(notificationId int) (DeleteNotificationResponse, error) {
+	var resp DeleteNotificationResponse
+	resp_body, err := c.request("DELETE", fmt.Sprintf("/notifications/%d", notificationId), nil, nil)
 	if err != nil {
 		return resp, err
 	}
