@@ -174,20 +174,20 @@ type DeleteNotificationResponse struct {
 	Success bool   `json:"success"`
 }
 
-func (c Client) request(method string, path string, params map[string]string, data map[string]string) (*[]byte, error) {
+func (c Client) request(method string, path string, params map[string]string, data map[string]interface{}, response interface{}) error {
 	jsonBody, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	url, err := url.JoinPath(APIBaseURL, path)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	queryParams := req.URL.Query()
@@ -201,135 +201,85 @@ func (c Client) request(method string, path string, params map[string]string, da
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &body, nil
+	if err := json.Unmarshal(body, &response); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // 获取指定节点
 func (c Client) GetNode(nodeName string) (GetNodeResponse, error) {
-	var resp GetNodeResponse
-	resp_body, err := c.request("GET", fmt.Sprintf("/nodes/%s", nodeName), nil, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response GetNodeResponse
+	err := c.request("GET", fmt.Sprintf("/nodes/%s", nodeName), nil, nil, &response)
+	return response, err
 }
 
 // 获取指定节点下的主题
 func (c Client) GetNodeTopics(nodeName string, page int) (GetNodeTopicsResponse, error) {
-	var resp GetNodeTopicsResponse
-	resp_body, err := c.request("GET", fmt.Sprintf("/nodes/%s/topics", nodeName), map[string]string{"p": strconv.Itoa(page)}, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response GetNodeTopicsResponse
+	err := c.request("GET", fmt.Sprintf("/nodes/%s/topics", nodeName), map[string]string{"p": strconv.Itoa(page)}, nil, &response)
+	return response, err
 }
 
 // 获取指定主题
 func (c Client) GetTopic(topicID int) (GetTopicResponse, error) {
-	var resp GetTopicResponse
-	resp_body, err := c.request("GET", fmt.Sprintf("/topics/%d", topicID), nil, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response GetTopicResponse
+	err := c.request("GET", fmt.Sprintf("/topics/%d", topicID), nil, nil, &response)
+	return response, err
 
 }
 
 // 获取指定主题下的回复
 func (c Client) GetTopicReplies(topicID int, page int) (GetTopicRepliesResponse, error) {
-	var resp GetTopicRepliesResponse
-	resp_body, err := c.request("GET", fmt.Sprintf("/topics/%d/replies", topicID), map[string]string{"p": strconv.Itoa(page)}, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response GetTopicRepliesResponse
+	err := c.request("GET", fmt.Sprintf("/topics/%d/replies", topicID), map[string]string{"p": strconv.Itoa(page)}, nil, &response)
+	return response, err
 }
 
 // 查看当前使用的令牌
 func (c Client) GetToken() (GetTokenResponse, error) {
-	var resp GetTokenResponse
-	resp_body, err := c.request("GET", "/token", nil, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response GetTokenResponse
+	err := c.request("GET", "/token", nil, nil, &response)
+	return response, err
 }
 
 // 获取自己的 Profile
 func (c Client) GetSelfProfile() (GetSelfProfileResponse, error) {
-	var resp GetSelfProfileResponse
-	resp_body, err := c.request("GET", "/member", nil, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response GetSelfProfileResponse
+	err := c.request("GET", "/member", nil, nil, &response)
+	return response, err
 }
 
 // 获取最新的提醒
 func (c Client) GetNotifications(page int) (GetNotificationsResponse, error) {
-	var resp GetNotificationsResponse
-	resp_body, err := c.request("GET", "/notifications", map[string]string{"p": strconv.Itoa(page)}, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response GetNotificationsResponse
+	err := c.request("GET", "/notifications", map[string]string{"p": strconv.Itoa(page)}, nil, &response)
+	return response, err
 }
 
 // 创建新的令牌
 func (c Client) CreateToken(scope TokenScope, expiration TokenExpiration) (CreateTokenResponse, error) {
-	var resp CreateTokenResponse
-	resp_body, err := c.request("POST", "/tokens", nil, map[string]string{"scope": string(scope), "expiration": strconv.Itoa(int(expiration))})
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response CreateTokenResponse
+	err := c.request("POST", "/tokens", nil, map[string]interface{}{"scope": scope, "expiration": expiration}, &response)
+	return response, err
 }
 
 // 删除指定的提醒
 func (c Client) DeleteNotification(notificationId int) (DeleteNotificationResponse, error) {
-	var resp DeleteNotificationResponse
-	resp_body, err := c.request("DELETE", fmt.Sprintf("/notifications/%d", notificationId), nil, nil)
-	if err != nil {
-		return resp, err
-	}
-	if err := json.Unmarshal(*resp_body, &resp); err != nil {
-		return resp, err
-	}
-	return resp, nil
+	var response DeleteNotificationResponse
+	err := c.request("DELETE", fmt.Sprintf("/notifications/%d", notificationId), nil, nil, &response)
+	return response, err
 }
 
 // Create V2EX API Client
