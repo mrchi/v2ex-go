@@ -17,6 +17,22 @@ type Client struct {
 	token string
 }
 
+// V2EX API 接口自定义错误
+type ResponseError struct {
+	Message string
+}
+
+func (e ResponseError) Error() string {
+	return fmt.Sprintf("API error, message: %s", e.Message)
+}
+
+// V2EX API 接口返回值公共参数 struct
+type v2exResponse struct {
+	Message string           `json:"message"`
+	Result  *json.RawMessage `json:"result"`
+	Success bool             `json:"success"`
+}
+
 type v2exNode struct {
 	Avatar       string `json:"avatar"`
 	Created      int    `json:"created"`
@@ -113,18 +129,6 @@ type v2exNotification struct {
 	Text            string `json:"text"`
 }
 
-type GetNodeResponse struct {
-	Message string   `json:"message"`
-	Result  v2exNode `json:"result"`
-	Success bool     `json:"success"`
-}
-
-type GetNodeTopicsResponse struct {
-	Message string      `json:"message"`
-	Result  []v2exTopic `json:"result"`
-	Success bool        `json:"success"`
-}
-
 type getTopicResult struct {
 	v2exTopic
 	Member      v2exMember       `json:"member"`
@@ -132,49 +136,11 @@ type getTopicResult struct {
 	Supplements []v2exSupplement `json:"supplements"`
 }
 
-type GetTopicResponse struct {
-	Message string         `json:"message"`
-	Result  getTopicResult `json:"result"`
-	Success bool           `json:"success"`
+type createTokenResult struct {
+	Token string `json:"token"`
 }
 
-type GetTopicRepliesResponse struct {
-	Message string      `json:"message"`
-	Result  []v2exReply `json:"result"`
-	Success bool        `json:"success"`
-}
-
-type GetTokenResponse struct {
-	Message string    `json:"message"`
-	Result  v2exToken `json:"result"`
-	Success bool      `json:"success"`
-}
-
-type GetSelfProfileResponse struct {
-	Success bool            `json:"success"`
-	Result  v2exSelfProfile `json:"result"`
-}
-
-type GetNotificationsResponse struct {
-	Message string             `json:"message"`
-	Result  []v2exNotification `json:"result"`
-	Success bool               `json:"success"`
-}
-
-type CreateTokenResponse struct {
-	Message string `json:"message"`
-	Result  struct {
-		Token string `json:"token"`
-	} `json:"result"`
-	Success bool `json:"success"`
-}
-
-type DeleteNotificationResponse struct {
-	Message string `json:"message"`
-	Success bool   `json:"success"`
-}
-
-func (c Client) request(method string, path string, params map[string]string, data map[string]interface{}, response interface{}) error {
+func (c Client) request(method string, path string, params map[string]string, data map[string]interface{}, result interface{}) error {
 	jsonBody, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -211,75 +177,76 @@ func (c Client) request(method string, path string, params map[string]string, da
 		return err
 	}
 
+	var response v2exResponse
 	if err := json.Unmarshal(body, &response); err != nil {
 		return err
+	}
+
+	if !response.Success {
+		return ResponseError{response.Message}
+	}
+
+	if result != nil {
+		if err := json.Unmarshal(*response.Result, result); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 // 获取指定节点
-func (c Client) GetNode(nodeName string) (GetNodeResponse, error) {
-	var response GetNodeResponse
-	err := c.request("GET", fmt.Sprintf("/nodes/%s", nodeName), nil, nil, &response)
-	return response, err
+func (c Client) GetNode(nodeName string) (result v2exNode, err error) {
+	err = c.request("GET", fmt.Sprintf("/nodes/%s", nodeName), nil, nil, &result)
+	return
 }
 
 // 获取指定节点下的主题
-func (c Client) GetNodeTopics(nodeName string, page int) (GetNodeTopicsResponse, error) {
-	var response GetNodeTopicsResponse
-	err := c.request("GET", fmt.Sprintf("/nodes/%s/topics", nodeName), map[string]string{"p": strconv.Itoa(page)}, nil, &response)
-	return response, err
+func (c Client) GetNodeTopics(nodeName string, page int) (result []v2exTopic, err error) {
+	err = c.request("GET", fmt.Sprintf("/nodes/%s/topics", nodeName), map[string]string{"p": strconv.Itoa(page)}, nil, &result)
+	return
 }
 
 // 获取指定主题
-func (c Client) GetTopic(topicID int) (GetTopicResponse, error) {
-	var response GetTopicResponse
-	err := c.request("GET", fmt.Sprintf("/topics/%d", topicID), nil, nil, &response)
-	return response, err
-
+func (c Client) GetTopic(topicID int) (result getTopicResult, err error) {
+	err = c.request("GET", fmt.Sprintf("/topics/%d", topicID), nil, nil, &result)
+	return
 }
 
 // 获取指定主题下的回复
-func (c Client) GetTopicReplies(topicID int, page int) (GetTopicRepliesResponse, error) {
-	var response GetTopicRepliesResponse
-	err := c.request("GET", fmt.Sprintf("/topics/%d/replies", topicID), map[string]string{"p": strconv.Itoa(page)}, nil, &response)
-	return response, err
+func (c Client) GetTopicReplies(topicID int, page int) (result []v2exReply, err error) {
+	err = c.request("GET", fmt.Sprintf("/topics/%d/replies", topicID), map[string]string{"p": strconv.Itoa(page)}, nil, &result)
+	return
 }
 
 // 查看当前使用的令牌
-func (c Client) GetToken() (GetTokenResponse, error) {
-	var response GetTokenResponse
-	err := c.request("GET", "/token", nil, nil, &response)
-	return response, err
+func (c Client) GetToken() (result v2exToken, err error) {
+	err = c.request("GET", "/token", nil, nil, &result)
+	return
 }
 
 // 获取自己的 Profile
-func (c Client) GetSelfProfile() (GetSelfProfileResponse, error) {
-	var response GetSelfProfileResponse
-	err := c.request("GET", "/member", nil, nil, &response)
-	return response, err
+func (c Client) GetSelfProfile() (result v2exSelfProfile, err error) {
+	err = c.request("GET", "/member", nil, nil, &result)
+	return
 }
 
 // 获取最新的提醒
-func (c Client) GetNotifications(page int) (GetNotificationsResponse, error) {
-	var response GetNotificationsResponse
-	err := c.request("GET", "/notifications", map[string]string{"p": strconv.Itoa(page)}, nil, &response)
-	return response, err
+func (c Client) GetNotifications(page int) (result []v2exNotification, err error) {
+	err = c.request("GET", "/notifications", map[string]string{"p": strconv.Itoa(page)}, nil, &result)
+	return
 }
 
 // 创建新的令牌
-func (c Client) CreateToken(scope TokenScope, expiration TokenExpiration) (CreateTokenResponse, error) {
-	var response CreateTokenResponse
-	err := c.request("POST", "/tokens", nil, map[string]interface{}{"scope": scope, "expiration": expiration}, &response)
-	return response, err
+func (c Client) CreateToken(scope TokenScope, expiration TokenExpiration) (result createTokenResult, err error) {
+	err = c.request("POST", "/tokens", nil, map[string]interface{}{"scope": scope, "expiration": expiration}, &result)
+	return
 }
 
 // 删除指定的提醒
-func (c Client) DeleteNotification(notificationId int) (DeleteNotificationResponse, error) {
-	var response DeleteNotificationResponse
-	err := c.request("DELETE", fmt.Sprintf("/notifications/%d", notificationId), nil, nil, &response)
-	return response, err
+func (c Client) DeleteNotification(notificationId int) (err error) {
+	err = c.request("DELETE", fmt.Sprintf("/notifications/%d", notificationId), nil, nil, nil)
+	return
 }
 
 // Create V2EX API Client
