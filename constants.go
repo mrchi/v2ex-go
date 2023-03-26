@@ -1,6 +1,6 @@
 package v2ex
 
-const APIBaseURL string = "https://www.v2ex.com/api/v2/"
+const baseURL string = "https://www.v2ex.com/api/v2/"
 
 const (
 	TokenScopeRegular    TokenScope = "regular"

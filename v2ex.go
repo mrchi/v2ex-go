@@ -18,12 +18,12 @@ type Client struct {
 }
 
 // V2EX API 接口自定义错误
-type ResponseError struct {
-	Message string
+type responseError struct {
+	message string
 }
 
-func (e ResponseError) Error() string {
-	return fmt.Sprintf("API error, message: %s", e.Message)
+func (e responseError) Error() string {
+	return fmt.Sprintf("API error, message: %s", e.message)
 }
 
 // V2EX API 接口返回值公共参数 struct
@@ -146,7 +146,7 @@ func (c Client) request(method string, path string, params map[string]string, da
 		return err
 	}
 
-	url, err := url.JoinPath(APIBaseURL, path)
+	url, err := url.JoinPath(baseURL, path)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (c Client) request(method string, path string, params map[string]string, da
 	}
 
 	if !response.Success {
-		return ResponseError{response.Message}
+		return responseError{response.Message}
 	}
 
 	if result != nil {
