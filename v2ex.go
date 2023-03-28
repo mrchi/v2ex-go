@@ -17,20 +17,15 @@ type Client struct {
 	token string
 }
 
-// V2EX API 接口自定义错误
-type responseError struct {
-	message string
-}
-
-func (e responseError) Error() string {
-	return fmt.Sprintf("API error, message: %s", e.message)
-}
-
 // V2EX API 接口返回值公共参数 struct
 type v2exResponse struct {
 	Message string           `json:"message"`
 	Result  *json.RawMessage `json:"result"`
 	Success bool             `json:"success"`
+}
+
+func (r *v2exResponse) Error() string {
+	return fmt.Sprintf("API error, message: %s", r.Message)
 }
 
 type v2exNode struct {
@@ -183,7 +178,7 @@ func (c Client) request(method string, path string, params map[string]string, da
 	}
 
 	if !response.Success {
-		return responseError{response.Message}
+		return &response
 	}
 
 	if result != nil {
