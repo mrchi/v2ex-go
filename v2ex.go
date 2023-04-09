@@ -30,11 +30,11 @@ func (r *v2exResponse) Error() string {
 
 type v2exNode struct {
 	Avatar       string `json:"avatar"`
-	Created      int    `json:"created"`
+	Created      int64  `json:"created"`
 	Footer       string `json:"footer"`
 	Header       string `json:"header"`
 	Id           int    `json:"id"`
-	LastModified int    `json:"last_modified"`
+	LastModified int64  `json:"last_modified"`
 	Name         string `json:"name"`
 	Title        string `json:"title"`
 	Topics       int    `json:"topics"`
@@ -44,9 +44,9 @@ type v2exNode struct {
 type v2exTopic struct {
 	Content         string `json:"content"`
 	ContentRendered string `json:"content_rendered"`
-	Created         int    `json:"created"`
+	Created         int64  `json:"created"`
 	Id              int    `json:"id"`
-	LastModified    int    `json:"last_modified"`
+	LastModified    int64  `json:"last_modified"`
 	LastReplyBy     string `json:"last_reply_by"`
 	LastTouched     int    `json:"last_touched"`
 	Replies         int    `json:"replies"`
@@ -58,7 +58,7 @@ type v2exTopic struct {
 type v2exMember struct {
 	Avatar   string `json:"avatar"`
 	Bio      string `json:"bio"`
-	Created  int    `json:"created"`
+	Created  int64  `json:"created"`
 	Github   string `json:"github"`
 	Id       int    `json:"id"`
 	Url      string `json:"url"`
@@ -69,7 +69,7 @@ type v2exMember struct {
 type v2exSupplement struct {
 	Content          string `json:"content"`
 	Content_Rendered string `json:"content_rendered"`
-	Created          int    `json:"created"`
+	Created          int64  `json:"created"`
 	Id               int    `json:"id"`
 	Syntax           int    `json:"syntax"`
 }
@@ -77,13 +77,13 @@ type v2exSupplement struct {
 type v2exReply struct {
 	Content         string     `json:"content"`
 	ContentRendered string     `json:"content_rendered"`
-	Created         int        `json:"created"`
+	Created         int64      `json:"created"`
 	Id              int        `json:"id"`
 	Member          v2exMember `json:"member"`
 }
 
 type v2exToken struct {
-	Created     int    `json:"created"`
+	Created     int64  `json:"created"`
 	Expiration  int    `json:"expiration"`
 	GoodForDays int    `json:"good_for_days"`
 	LastUsed    int    `json:"last_used"`
@@ -98,10 +98,10 @@ type v2exSelfProfile struct {
 	AvatarNormal string `json:"avatar_normal"`
 	Bio          string `json:"bio"`
 	Btc          string `json:"btc"`
-	Created      int    `json:"created"`
+	Created      int64  `json:"created"`
 	Github       string `json:"github"`
 	Id           int    `json:"id"`
-	LastModified int    `json:"last_modified"`
+	LastModified int64  `json:"last_modified"`
 	Location     string `json:"location"`
 	Psn          string `json:"psn"`
 	Tagline      string `json:"tagline"`
@@ -112,9 +112,9 @@ type v2exSelfProfile struct {
 }
 
 type v2exNotification struct {
-	Created     int `json:"created"`
-	ForMemberId int `json:"for_member_id"`
-	Id          int `json:"id"`
+	Created     int64 `json:"created"`
+	ForMemberId int   `json:"for_member_id"`
+	Id          int   `json:"id"`
 	Member      struct {
 		Username string `json:"username"`
 	} `json:"member"`
